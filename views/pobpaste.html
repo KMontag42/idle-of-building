@@ -1,0 +1,14 @@
+{{ block "pobpaste-form" . }}
+<form id='pobpaste-form' hx-encoding='multipart/form-data' hx-post='/upload-export-string' hx-swap="outerHTML">
+  <textarea name='raw'>{{ .Raw }}</textarea>
+  <button>
+    Upload
+  </button>
+</form>
+{{ end }}
+
+{{ block "pobpaste" . }}
+<div id="pobpaste">
+  <textarea>{{ .Decoded }}</textarea>
+</div>
+{{ end }}

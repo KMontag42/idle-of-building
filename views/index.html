@@ -1,0 +1,21 @@
+{{ block "index" . }}
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <script src="https://unpkg.com/htmx.org/dist/htmx.min.js"></script>
+
+  <title>Idle of Building</title>
+</head>
+
+<body>
+  <h1>Idle of Building</h1>
+
+  {{ template "pobpaste-form" . }}
+</body>
+
+</html>
+{{ end }}
