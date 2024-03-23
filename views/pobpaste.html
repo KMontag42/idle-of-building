@@ -15,6 +15,23 @@
   <div>
     {{ .Character.Build.Level }}
     {{ .Character.Build.ClassName }}
+    <div>
+      {{ range .Character.Build.PlayerStats }}
+      {{ template "player-stat" . }}
+      {{ end }}
+    </div>
   </div>
+  <pre>
+    {{ .Character }}
+  </pre>
+  <pre>
+    {{ .Decoded }}
+  </pre>
+</div>
+{{ end }}
+
+{{ block "player-stat" . }}
+<div id="player-stat-{{ .Stat }}">
+  {{ .Stat }}: {{ .Value }}
 </div>
 {{ end }}
