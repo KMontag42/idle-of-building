@@ -19,8 +19,8 @@ type MonsterLevel struct {
 }
 
 type Enemy struct {
-  MonsterLevel
-  Name string
+	MonsterLevel
+	Name string
 }
 
 func ReadMonsterData() []MonsterLevel {
@@ -92,14 +92,14 @@ func ReadMonsterData() []MonsterLevel {
 }
 
 func BuildEnemy(name string, level int, monster_levels []MonsterLevel) Enemy {
-  for _, monster_level := range monster_levels {
-    if monster_level.Level == level {
-      return Enemy{
-        MonsterLevel: monster_level,
-        Name: name,
-      }
-    }
-  }
-  log.Fatalf("Monster level %d not found", level)
-  panic("Monster level not found")
+	for _, monster_level := range monster_levels {
+		if monster_level.Level == level {
+			return Enemy{
+				MonsterLevel: monster_level,
+				Name:         name,
+			}
+		}
+	}
+	log.Fatalf("Monster level %d not found", level)
+	panic("Monster level not found")
 }

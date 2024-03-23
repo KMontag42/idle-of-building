@@ -5,24 +5,24 @@ import (
 	"compress/zlib"
 	"encoding/base64"
 
+	"github.com/kmontag42/idle-of-building/character"
 	"github.com/labstack/echo/v4"
-        "github.com/kmontag42/idle-of-building/character"
 
 	"io"
 	"net/http"
 )
 
 type PobPaste struct {
-	Raw     string
-	Decoded string
-        Character character.Character
+	Raw       string
+	Decoded   string
+	Character character.Character
 }
 
 func newPobPaste(raw string, decoded string, character character.Character) *PobPaste {
 	return &PobPaste{
-		Raw:     raw,
-		Decoded: decoded,
-                Character: character,
+		Raw:       raw,
+		Decoded:   decoded,
+		Character: character,
 	}
 }
 
@@ -57,14 +57,14 @@ func UploadExportString(c echo.Context) error {
 		)
 	}
 
-        character_xml := string(unzipped)
-        character, err := character.LoadCharacter(character_xml)
-        if err != nil {
-          return c.String(
-            http.StatusNotAcceptable,
-            err.Error(),
-          )
-        }
+	character_xml := string(unzipped)
+	character, err := character.LoadCharacter(character_xml)
+	if err != nil {
+		return c.String(
+			http.StatusNotAcceptable,
+			err.Error(),
+		)
+	}
 	paste := newPobPaste(raw, character_xml, character)
 
 	return c.Render(

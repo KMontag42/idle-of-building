@@ -41,4 +41,3 @@ func UploadFile(c echo.Context) error {
 
 	return c.HTML(http.StatusOK, fmt.Sprintf("File %s uploaded successfully with fields name=%s and email=%s.", file.Filename, name, email))
 }
-

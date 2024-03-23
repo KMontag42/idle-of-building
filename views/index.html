@@ -1,48 +1,46 @@
 {{ block "index" . }}
 <!doctype html>
 <html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://unpkg.com/htmx.org/dist/htmx.min.js"></script>
 
-  <script src="https://unpkg.com/htmx.org/dist/htmx.min.js"></script>
+    <title>Idle of Building</title>
+  </head>
 
-  <title>Idle of Building</title>
-</head>
+  <body>
+    <h1>Idle of Building</h1>
 
-<body>
-  <h1>Idle of Building</h1>
+    {{ template "pobpaste-form" . }}
 
-  {{ template "pobpaste-form" . }}
+    <div id="output"></div>
+    <script>
+      var loc = window.location;
+      var uri = "ws:";
 
-  <div id="output"></div>
-  <script>
-    var loc = window.location;
-    var uri = 'ws:';
+      if (loc.protocol === "https:") {
+        uri = "wss:";
+      }
+      uri += "//" + loc.host;
+      uri += loc.pathname + "ws";
 
-    if (loc.protocol === 'https:') {
-      uri = 'wss:';
-    }
-    uri += '//' + loc.host;
-    uri += loc.pathname + 'ws';
+      ws = new WebSocket(uri);
 
-    ws = new WebSocket(uri)
+      ws.onopen = function () {
+        console.log("Connected");
+      };
 
-    ws.onopen = function() {
-      console.log('Connected')
-    }
+      ws.onmessage = function (evt) {
+        var out = document.getElementById("output");
+        out.innerHTML += evt.data + "<br>";
+      };
 
-    ws.onmessage = function(evt) {
-      var out = document.getElementById('output');
-      out.innerHTML += evt.data + '<br>';
-    }
-
-    setInterval(function() {
-      ws.send('Hello, Server!');
-    }, 1000);
-  </script>
-</body>
-
+      setInterval(function () {
+        ws.send("Hello, Server!");
+      }, 1000);
+    </script>
+  </body>
 </html>
 {{ end }}

@@ -11,37 +11,23 @@
           <th>Life</th>
           <th>Experience</th>
         </tr>
+      </thead>
+
       <tbody>
-        {{ range .Enemies }}
-        {{ template "enemy" . }}
-        {{ end }}
+        {{ range .Enemies }} {{ template "enemy" . }} {{ end }}
       </tbody>
     </table>
   </div>
 </div>
-{{ end }}
-
-{{ block "map-results" . }}
+{{ end }} {{ block "map-results" . }}
 <p>Map victory: {{ .Victory }}</p>
 <p>Experience gained: {{ .ExperienceGained }}</p>
-{{ range .Results }}
-{{ template "map-result" . }}
-{{ end }}
-{{ end }}
-
-{{ block "enemy" . }}
+{{ range .Results }} {{ template "map-result" . }} {{ end }} {{ end }} {{ block
+"enemy" . }}
 <tr id="enemy-{{ .Name }}">
-  <td>
-    {{ .Name }}
-  </td>
-  <td>
-    {{ .Level }}
-  </td>
-  <td>
-    {{ .Life }}
-  </td>
-  <td>
-    {{ .Experience }}
-  </td>
+  <td>{{ .Name }}</td>
+  <td>{{ .Level }}</td>
+  <td>{{ .Life }}</td>
+  <td>{{ .Experience }}</td>
 </tr>
 {{ end }}
