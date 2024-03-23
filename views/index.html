@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <script src="https://unpkg.com/htmx.org/dist/htmx.min.js"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.11/dist/ext/ws.js"></script>
 
     <title>Idle of Building</title>
   </head>
@@ -16,31 +17,6 @@
     {{ template "pobpaste-form" . }}
 
     <div id="output"></div>
-    <script>
-      var loc = window.location;
-      var uri = "ws:";
-
-      if (loc.protocol === "https:") {
-        uri = "wss:";
-      }
-      uri += "//" + loc.host;
-      uri += loc.pathname + "ws";
-
-      ws = new WebSocket(uri);
-
-      ws.onopen = function () {
-        console.log("Connected");
-      };
-
-      ws.onmessage = function (evt) {
-        var out = document.getElementById("output");
-        out.innerHTML += evt.data + "<br>";
-      };
-
-      setInterval(function () {
-        ws.send("Hello, Server!");
-      }, 1000);
-    </script>
   </body>
 </html>
 {{ end }}

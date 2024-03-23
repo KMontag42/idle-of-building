@@ -19,7 +19,9 @@
     </table>
   </div>
 </div>
-{{ end }} {{ block "map-results" . }}
+{{ end }}
+
+{{ block "map-results" . }}
 <p>Map victory: {{ .Victory }}</p>
 <p>Experience gained: {{ .ExperienceGained }}</p>
 {{ range .Results }} {{ template "map-result" . }} {{ end }} {{ end }} {{ block

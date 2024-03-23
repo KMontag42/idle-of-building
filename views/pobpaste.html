@@ -8,15 +8,24 @@
   <textarea name="raw" cols="42" rows="8">{{ .Raw }}</textarea>
   <button>Upload</button>
 </form>
-{{ end }} {{ block "pobpaste" . }}
-<div id="pobpaste">
+{{ end }}
+
+{{ block "pobpaste" . }}
+<div
+  id="pobpaste"
+  hx-ext="ws"
+  ws-connect="/ws"
+>
   <textarea cols="42" rows="8">{{ .Raw }}</textarea>
   <p>{{ .Character.Build.ClassName }} {{ .Character.Build.Level }}</p>
-  <form id="run-map" hx-post="/run-map" hx-swap="outerHTML">
-    <input type="hidden" name="xml" value="{{ .Decoded }}" />
+  <form id="start-map-form" ws-send>
+    <input type="hidden" name="type" value="start map" />
+    <input type="hidden" name="data" value="{{ .Decoded }}" />
     <button>Run Map</button>
   </form>
 </div>
-{{ end }} {{ block "player-stat" . }}
+{{ end }}
+
+{{ block "player-stat" . }}
 <div id="player-stat-{{ .Stat }}">{{ .Stat }}: {{ .Value }}</div>
 {{ end }}

@@ -9,6 +9,9 @@ import (
 
 	"github.com/kmontag42/idle-of-building/character"
 	"github.com/kmontag42/idle-of-building/enemy"
+	"github.com/kmontag42/idle-of-building/utils"
+	"github.com/labstack/echo/v4"
+	"golang.org/x/net/websocket"
 )
 
 type BattleResult struct {
@@ -46,6 +49,7 @@ func RunMap(
 	enemies []enemy.Enemy,
 	wg *sync.WaitGroup,
 	resultChannel chan<- BattleResult,
+	ws *websocket.Conn,
 ) {
 	defer wg.Done()
 	heroWon := true
@@ -56,12 +60,24 @@ func RunMap(
 			heroWon = false
 			break
 		}
+                err := utils.EmitMessage(
+                  ws,
+                  "battle",
+                  fmt.Sprintf("%s has defeated %s", hero.Build.ClassName, enemy.Name),
+                )
+                if err != nil {
+                  log.Printf("error sending message: %v\n", err)
+                }
 	}
 	log.Printf("%s has cleared the map\n", hero.Build.ClassName)
 	resultChannel <- BattleResult{Character: *hero, Result: heroWon, Enemies: enemies}
 }
 
-func ExecuteMapForCharacters(characters []character.Character) MapResult {
+func ExecuteMapForCharacters(
+	characters []character.Character,
+	ws *websocket.Conn,
+	c echo.Context,
+) MapResult {
 	var wg sync.WaitGroup
 	resultChannel := make(chan BattleResult)
 
@@ -88,7 +104,7 @@ func ExecuteMapForCharacters(characters []character.Character) MapResult {
 
 	for hero, enemies := range maps {
 		wg.Add(1)
-		go RunMap(hero, enemies, &wg, resultChannel)
+		go RunMap(hero, enemies, &wg, resultChannel, ws)
 	}
 
 	go func() {
