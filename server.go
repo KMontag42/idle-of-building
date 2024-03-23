@@ -36,6 +36,8 @@ func main() {
 		return c.Render(http.StatusOK, "index", nil)
 	})
 
+        e.GET("/ws", routes.WebSockets)
+
 	e.POST("/upload", routes.UploadFile)
         e.POST("/upload-export-string", routes.UploadExportString)
         e.POST("/run-map", routes.RunMapForCharacter)

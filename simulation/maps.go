@@ -2,12 +2,13 @@ package simulation
 
 import (
 	"fmt"
-	"github.com/kmontag42/idle-of-building/character"
-	"github.com/kmontag42/idle-of-building/enemy"
 	"log"
 	"math/rand"
 	"sync"
 	"time"
+
+	"github.com/kmontag42/idle-of-building/character"
+	"github.com/kmontag42/idle-of-building/enemy"
 )
 
 type BattleResult struct {
@@ -47,7 +48,6 @@ func RunMap(
 	resultChannel chan<- BattleResult,
 ) {
 	defer wg.Done()
-	log.Printf("%s has entered the map\n", hero.Build.ClassName)
 	heroWon := true
 	for _, enemy := range enemies {
 		log.Printf("%s has encountered %s\n", hero.Build.ClassName, enemy.Name)

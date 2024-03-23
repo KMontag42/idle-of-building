@@ -1,8 +1,6 @@
 {{ block "pobpaste-form" . }}
 <form id='pobpaste-form' hx-encoding='multipart/form-data' hx-post='/upload-export-string' hx-swap="outerHTML">
-  <textarea name='raw' cols="42" rows="8">
-    {{ .Raw }}
-  </textarea>
+  <textarea name='raw' cols="42" rows="8">{{ .Raw }}</textarea>
   <button>
     Upload
   </button>
@@ -12,10 +10,7 @@
 {{ block "pobpaste" . }}
 <div id="pobpaste">
   <textarea cols="42" rows="8">{{ .Raw }}</textarea>
-  <div>
-    {{ .Character.Build.Level }}
-    {{ .Character.Build.ClassName }}
-  </div>
+  <p>{{ .Character.Build.ClassName }} {{ .Character.Build.Level }}</p>
   <form id="run-map" hx-post="/run-map" hx-swap="outerHTML">
     <input type="hidden" name="xml" value="{{ .Decoded }}">
     <button>
