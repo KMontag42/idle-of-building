@@ -38,5 +38,6 @@ func main() {
 
 	e.POST("/upload", routes.UploadFile)
         e.POST("/upload-export-string", routes.UploadExportString)
+        e.POST("/run-map", routes.RunMapForCharacter)
 	e.Logger.Fatal(e.Start(":42069"))
 }

@@ -2,7 +2,6 @@ package character
 
 import (
 	"encoding/xml"
-	"fmt"
 )
 
 // a character loaded from the path-of-building xml
@@ -37,9 +36,34 @@ func LoadCharacter(xml_string string) (Character, error) {
 	var character Character
 	err := xml.Unmarshal([]byte(xml_string), &character)
 	if err != nil {
-		panic(err)
+		return character, err
 	}
-	fmt.Println(character)
 
 	return character, nil
+}
+
+func (c Character) Dps() float64 {
+	for _, stat := range c.Build.PlayerStats {
+		if stat.Stat == "CombinedDPS" {
+			return stat.Value
+		}
+	}
+	panic("DPS not found")
+}
+
+func (c Character) Life() float64 {
+	for _, stat := range c.Build.PlayerStats {
+		if stat.Stat == "TotalEHP" {
+			return stat.Value
+		}
+	}
+	panic("Life not found")
+}
+
+func (c Character) SetLife(value float64) {
+	for i, stat := range c.Build.PlayerStats {
+		if stat.Stat == "TotalEHP" {
+			c.Build.PlayerStats[i].Value = value
+		}
+	}
 }

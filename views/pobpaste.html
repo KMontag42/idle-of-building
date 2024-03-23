@@ -15,18 +15,13 @@
   <div>
     {{ .Character.Build.Level }}
     {{ .Character.Build.ClassName }}
-    <div>
-      {{ range .Character.Build.PlayerStats }}
-      {{ template "player-stat" . }}
-      {{ end }}
-    </div>
   </div>
-  <pre>
-    {{ .Character }}
-  </pre>
-  <pre>
-    {{ .Decoded }}
-  </pre>
+  <form id="run-map" hx-post="/run-map" hx-swap="outerHTML">
+    <input type="hidden" name="xml" value="{{ .Decoded }}">
+    <button>
+      Run Map
+    </button>
+  </form>
 </div>
 {{ end }}
 

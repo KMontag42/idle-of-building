@@ -1,104 +1,122 @@
-package main
+package simulation
 
 import (
-  "sync"
-  "time"
-  "log"
+	"fmt"
+	"github.com/kmontag42/idle-of-building/character"
+	"github.com/kmontag42/idle-of-building/enemy"
+	"log"
+	"math/rand"
+	"sync"
+	"time"
 )
 
-type Entity struct {
-  Name string
-  HP   int
-  DPS  int
+type BattleResult struct {
+	Character character.Character
+	Result    bool
+	Enemies   []enemy.Enemy
 }
 
-type Character struct {
-  Entity
+type MapResult struct {
+	Results          []BattleResult
+	ExperienceGained float64
+	Victory          bool
 }
 
-type Enemy struct {
-  Entity
+func Battle(hero *character.Character, enemy enemy.Enemy) bool {
+	for hero.Life() > 0 && enemy.Life > 0 {
+		enemy.Life -= hero.Dps()
+		hero.SetLife(hero.Life() - enemy.Damage)
+		log.Printf("%s HP: %f\n", hero.Build.ClassName, hero.Life())
+		log.Printf("%s HP: %f\n", enemy.Name, enemy.Life)
+		time.Sleep(1 * time.Second)
+	}
+
+	if hero.Life() <= 0 {
+		log.Printf("%s has been defeated\n", hero.Build.ClassName)
+		return false
+	} else {
+		log.Printf("%s has been defeated\n", enemy.Name)
+		return true
+	}
 }
 
-func Battle(hero *Character, enemy Enemy) bool {
-  for hero.HP > 0 && enemy.HP > 0 {
-    enemy.HP -= hero.DPS
-    hero.HP -= enemy.DPS
-    log.Printf("%s HP: %d\n", hero.Name, hero.HP)
-    log.Printf("%s HP: %d\n", enemy.Name, enemy.HP)
-    time.Sleep(1 * time.Second)
-  }
-
-  if hero.HP <= 0 {
-    log.Printf("%s has been defeated\n", hero.Name)
-    return false
-  } else {
-    log.Printf("%s has been defeated\n", enemy.Name)
-    return true
-  }
+func RunMap(
+	hero *character.Character,
+	enemies []enemy.Enemy,
+	wg *sync.WaitGroup,
+	resultChannel chan<- BattleResult,
+) {
+	defer wg.Done()
+	log.Printf("%s has entered the map\n", hero.Build.ClassName)
+	heroWon := true
+	for _, enemy := range enemies {
+		log.Printf("%s has encountered %s\n", hero.Build.ClassName, enemy.Name)
+		if !Battle(hero, enemy) {
+			log.Printf("%s has lost the battle\n", hero.Build.ClassName)
+			heroWon = false
+			break
+		}
+	}
+	log.Printf("%s has cleared the map\n", hero.Build.ClassName)
+	resultChannel <- BattleResult{Character: *hero, Result: heroWon, Enemies: enemies}
 }
 
-func RunMap(hero *Character, enemies []Enemy, wg *sync.WaitGroup) bool {
-  defer wg.Done()
-  log.Printf("%s has entered the map\n", hero.Name)
-  for _, enemy := range enemies {
-    log.Printf("%s has encountered %s\n", hero.Name, enemy.Name)
-    if Battle(hero, enemy) {
-      log.Printf("%s has won the battle\n", hero.Name)
-    } else {
-      log.Printf("%s has lost the battle\n", hero.Name)
-      return false
-    }
-  }
-  log.Printf("%s has cleared the map\n", hero.Name)
-  return true
-}
+func ExecuteMapForCharacters(characters []character.Character) MapResult {
+	var wg sync.WaitGroup
+	resultChannel := make(chan BattleResult)
 
-// TODO: rename this to something else after testing
-func main() {
-  var wg sync.WaitGroup
+	monster_levels := enemy.ReadMonsterData()
+	enemies := []enemy.Enemy{}
+	// generate random enemies
+	number_of_enemies := 1 + int(rand.Float64()*19)
+	for i := 0; i < number_of_enemies; i++ {
+		enemy_name := "Enemy" + fmt.Sprint(i)
+		enemy_level := int(rand.Float64() * 100.0)
 
-  hero := &Character{
-    Entity: Entity{
-      Name: "Hero",
-      HP:   100,
-      DPS:  10,
-    },
-  }
-  hero2 := &Character{
-    Entity: Entity{
-      Name: "Hero 2",
-      HP:   100,
-      DPS:  10,
-    },
-  }
+		enemy := enemy.BuildEnemy(enemy_name, enemy_level, monster_levels)
 
-  enemies := []Enemy{
-    {
-      Entity: Entity{
-        Name: "Enemy 1",
-        HP:   50,
-        DPS:  5,
-      },
-    },
-    {
-      Entity: Entity{
-        Name: "Enemy 2",
-        HP:   50,
-        DPS:  5,
-      },
-    },
-  }
+		enemies = append(
+			enemies,
+			enemy,
+		)
+	}
+	maps := map[*character.Character][]enemy.Enemy{}
 
-  maps := map[Character][]Enemy{
-    *hero: enemies,
-    *hero2: enemies,
-  }
+	for _, character := range characters {
+		maps[&character] = enemies
+	}
 
-  for hero, enemies := range maps {
-    wg.Add(1)
-    go RunMap(&hero, enemies, &wg)
-  }
+	for hero, enemies := range maps {
+		wg.Add(1)
+		go RunMap(hero, enemies, &wg, resultChannel)
+	}
 
-  wg.Wait()
+	go func() {
+		wg.Wait()
+		close(resultChannel)
+	}()
+
+	results := []BattleResult{}
+	for result := range resultChannel {
+		results = append(results, result)
+	}
+
+	experience_gained := 0
+	for _, result := range results {
+		if result.Result {
+			for _, enemy := range result.Enemies {
+				experience_gained += enemy.Experience
+			}
+		}
+	}
+
+	victory := true
+	for _, result := range results {
+		if !result.Result {
+			victory = false
+			break
+		}
+	}
+
+	return MapResult{Results: results, ExperienceGained: float64(experience_gained), Victory: victory}
 }
