@@ -21,6 +21,46 @@ type Build struct {
 	PlayerStats            []PlayerStat `xml:"PlayerStat"`
 }
 
+type Skills struct {
+	SortGemsByDPSField  string     `xml:"sortGemsByDPSField,attr"`
+	ActiveSkillSet      string     `xml:"activeSkillSet,attr"`
+	SortGemsByDPS       string     `xml:"sortGemsByDPS,attr"`
+	DefaultGemQuality   string     `xml:"defaultGemQuality,attr"`
+	DefaultGemLevel     string     `xml:"defaultGemLevel,attr"`
+	ShowSupportGemTypes string     `xml:"showSupportGemTypes,attr"`
+	ShowAltQualityGems  string     `xml:"showAltQualityGems,attr"`
+	SkillSets           []SkillSet `xml:"SkillSet"`
+}
+
+type SkillSet struct {
+	ID     string  `xml:"id,attr"`
+	Skills []Skill `xml:"Skill"`
+}
+
+type Skill struct {
+	MainActiveSkillCalcs string `xml:"mainActiveSkillCalcs,attr"`
+	IncludeInFullDPS     string `xml:"includeInFullDPS,attr"`
+	Label                string `xml:"label,attr"`
+	Enabled              string `xml:"enabled,attr"`
+	Slot                 string `xml:"slot,attr"`
+	MainActiveSkill      string `xml:"mainActiveSkill,attr"`
+	Gems                 []Gem  `xml:"Gem"`
+}
+
+type Gem struct {
+	EnableGlobal2 string `xml:"enableGlobal2,attr"`
+	Level         string `xml:"level,attr"`
+	GemId         string `xml:"gemId,attr"`
+	VariantId     string `xml:"variantId,attr"`
+	SkillId       string `xml:"skillId,attr"`
+	Quality       string `xml:"quality,attr"`
+	QualityId     string `xml:"qualityId,attr"`
+	EnableGlobal1 string `xml:"enableGlobal1,attr"`
+	Enabled       string `xml:"enabled,attr"`
+	Count         string `xml:"count,attr"`
+	NameSpec      string `xml:"nameSpec,attr"`
+}
+
 type PlayerStat struct {
 	Stat  string  `xml:"stat,attr"`
 	Value float64 `xml:"value,attr"`
@@ -29,6 +69,7 @@ type PlayerStat struct {
 type Character struct {
 	XMLName xml.Name `xml:"PathOfBuilding"`
 	Build   Build    `xml:"Build"`
+	Skills  Skills   `xml:"Skills"`
 }
 
 // load a character from the path-of-building xml
@@ -66,4 +107,16 @@ func (c Character) SetLife(value float64) {
 			c.Build.PlayerStats[i].Value = value
 		}
 	}
+}
+
+func (c Character) SixLinks() []Skill {
+	six_links := []Skill{}
+	for _, skillSet := range c.Skills.SkillSets {
+		for _, skill := range skillSet.Skills {
+			if len(skill.Gems) == 6 {
+				six_links = append(six_links, skill)
+			}
+		}
+	}
+	return six_links
 }

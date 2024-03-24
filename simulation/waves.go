@@ -18,7 +18,6 @@ func SimulateWave(
 ) (BattleResult, error) {
 	heroWon := true
 	for _, enemy := range enemies {
-		log.Printf("%s has encountered %s\n", hero.Build.ClassName, enemy.Name)
 		if !Battle(hero, enemy) {
 			log.Printf("%s has lost the battle\n", hero.Build.ClassName)
 			heroWon = false
@@ -28,12 +27,12 @@ func SimulateWave(
 
 	time.Sleep(1 * time.Second)
 
-	log.Printf("%s has cleared the map\n", hero.Build.ClassName)
+	log.Printf("%s has cleared the wave\n", hero.Build.ClassName)
 	if heroWon {
 		err := utils.EmitMessage(
 			ws,
 			"battle",
-			fmt.Sprintf("%s has defeated the wave", hero.Build.ClassName),
+			fmt.Sprintf("%s has cleared the wave", hero.Build.ClassName),
 		)
 		if err != nil {
 			log.Printf("error sending message: %v\n", err)

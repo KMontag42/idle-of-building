@@ -3,7 +3,7 @@ package simulation
 import (
 	"fmt"
 	"log"
-        "math/rand"
+	"math/rand"
 
 	"github.com/kmontag42/idle-of-building/character"
 	"github.com/kmontag42/idle-of-building/enemy"
@@ -12,10 +12,10 @@ import (
 )
 
 type MapInfo struct {
-  Name string
-  MinWaveCount int
-  MaxWaveCount int
-  WaveInfo enemy.WaveInfo
+	Name         string
+	MinWaveCount int
+	MaxWaveCount int
+	WaveInfo     enemy.WaveInfo
 }
 
 type MapResult struct {
@@ -34,42 +34,42 @@ func (mr MapResult) String() string {
 }
 
 var whiteMap MapInfo = MapInfo{
-  Name: "White Map",
-  MinWaveCount: 1,
-  MaxWaveCount: 5,
-  WaveInfo: enemy.WaveInfo{
-    MinWaveSize:  10,
-    MaxWaveSize:  30,
-    MinWaveLevel: 60,
-    MaxWaveLevel: 70,
-    Boss:         false,
-  },
+	Name:         "White Map",
+	MinWaveCount: 1,
+	MaxWaveCount: 5,
+	WaveInfo: enemy.WaveInfo{
+		MinWaveSize:  10,
+		MaxWaveSize:  30,
+		MinWaveLevel: 60,
+		MaxWaveLevel: 70,
+		Boss:         false,
+	},
 }
 
 var yellowMap MapInfo = MapInfo{
-  Name: "Yellow Map",
-  MinWaveCount: 4,
-  MaxWaveCount: 8,
-  WaveInfo: enemy.WaveInfo{
-    MinWaveSize:  10,
-    MaxWaveSize:  40,
-    MinWaveLevel: 70,
-    MaxWaveLevel: 80,
-    Boss:         false,
-  },
+	Name:         "Yellow Map",
+	MinWaveCount: 4,
+	MaxWaveCount: 8,
+	WaveInfo: enemy.WaveInfo{
+		MinWaveSize:  10,
+		MaxWaveSize:  40,
+		MinWaveLevel: 70,
+		MaxWaveLevel: 80,
+		Boss:         false,
+	},
 }
 
 var redMap MapInfo = MapInfo{
-  Name: "Red Map",
-  MinWaveCount: 8,
-  MaxWaveCount: 12,
-  WaveInfo: enemy.WaveInfo{
-    MinWaveSize:  10,
-    MaxWaveSize:  50,
-    MinWaveLevel: 80,
-    MaxWaveLevel: 90,
-    Boss:         false,
-  },
+	Name:         "Red Map",
+	MinWaveCount: 8,
+	MaxWaveCount: 12,
+	WaveInfo: enemy.WaveInfo{
+		MinWaveSize:  10,
+		MaxWaveSize:  50,
+		MinWaveLevel: 80,
+		MaxWaveLevel: 90,
+		Boss:         false,
+	},
 }
 
 func ExecuteMapForCharacter(
@@ -78,9 +78,9 @@ func ExecuteMapForCharacter(
 	c echo.Context,
 ) MapResult {
 	var results []BattleResult
-        
-        // run a random number of waves
-        wave_count := whiteMap.MinWaveCount + rand.Intn(whiteMap.MaxWaveCount - whiteMap.MinWaveCount)
+
+	// run a random number of waves
+	wave_count := whiteMap.MinWaveCount + rand.Intn(whiteMap.MaxWaveCount-whiteMap.MinWaveCount)
 
 	for i := 0; i < wave_count; i++ {
 		enemies := enemy.CreateWave(whiteMap.WaveInfo)
@@ -91,10 +91,10 @@ func ExecuteMapForCharacter(
 		}
 		results = append(results, result)
 
-                // if the hero lost a battle, stop the simulation
-                if !result.Result {
-                  break
-                }
+		// if the hero lost a battle, stop the simulation
+		if !result.Result {
+			break
+		}
 	}
 
 	experience_gained := 0
