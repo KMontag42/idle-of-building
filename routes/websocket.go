@@ -41,13 +41,17 @@ func WebSockets(c echo.Context) error {
 					c,
 				)
 
+                                battle_result := "completed"
+                                if !results.Victory {
+                                  battle_result = "failed"
+                                }
 				end_message := fmt.Sprintf(
-					"Map completed. %f experience gained.",
+					"Map %s. %f experience gained.",
+                                        battle_result,
 					results.ExperienceGained,
 				)
 
 				utils.EmitMessage(ws, "battle-end", end_message)
-				break
 			}
 		}
 	}).ServeHTTP(c.Response(), c.Request())

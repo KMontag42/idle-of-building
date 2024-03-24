@@ -1,9 +1,9 @@
 package simulation
 
 import (
-	"math/rand"
 	"fmt"
 	"log"
+        "math/rand"
 
 	"github.com/kmontag42/idle-of-building/character"
 	"github.com/kmontag42/idle-of-building/enemy"
@@ -33,15 +33,41 @@ func (mr MapResult) String() string {
 	)
 }
 
-var map1 MapInfo = MapInfo{
-  Name: "Map 1",
+var whiteMap MapInfo = MapInfo{
+  Name: "White Map",
   MinWaveCount: 1,
   MaxWaveCount: 5,
   WaveInfo: enemy.WaveInfo{
     MinWaveSize:  10,
     MaxWaveSize:  30,
     MinWaveLevel: 60,
+    MaxWaveLevel: 70,
+    Boss:         false,
+  },
+}
+
+var yellowMap MapInfo = MapInfo{
+  Name: "Yellow Map",
+  MinWaveCount: 4,
+  MaxWaveCount: 8,
+  WaveInfo: enemy.WaveInfo{
+    MinWaveSize:  10,
+    MaxWaveSize:  40,
+    MinWaveLevel: 70,
     MaxWaveLevel: 80,
+    Boss:         false,
+  },
+}
+
+var redMap MapInfo = MapInfo{
+  Name: "Red Map",
+  MinWaveCount: 8,
+  MaxWaveCount: 12,
+  WaveInfo: enemy.WaveInfo{
+    MinWaveSize:  10,
+    MaxWaveSize:  50,
+    MinWaveLevel: 80,
+    MaxWaveLevel: 90,
     Boss:         false,
   },
 }
@@ -51,34 +77,24 @@ func ExecuteMapForCharacter(
 	ws *websocket.Conn,
 	c echo.Context,
 ) MapResult {
-	var map_waves []enemy.WaveInfo
-
-        wave_count := rand.Intn(map1.MaxWaveCount - map1.MinWaveCount + 1) + map1.MinWaveCount
-        log.Printf("wave count: %d\n", wave_count)
-        map_waves = make([]enemy.WaveInfo, wave_count)
-        for i := 0; i < wave_count; i++ {
-          map_waves[i] = map1.WaveInfo
-        }
-
-        // add boss wave
-        map_waves = append(map_waves, enemy.WaveInfo{
-          MinWaveSize:  1,
-          MaxWaveSize:  1,
-          MinWaveLevel: 100,
-          MaxWaveLevel: 100,
-          Boss:         true,
-        })
-
 	var results []BattleResult
+        
+        // run a random number of waves
+        wave_count := whiteMap.MinWaveCount + rand.Intn(whiteMap.MaxWaveCount - whiteMap.MinWaveCount)
 
-	for wave := range map_waves {
-		enemies := enemy.CreateWave(map_waves[wave])
+	for i := 0; i < wave_count; i++ {
+		enemies := enemy.CreateWave(whiteMap.WaveInfo)
 		result, err := SimulateWave(character, enemies, ws)
 		if err != nil {
 			log.Printf("error simulating wave: %v\n", err)
 			break
 		}
 		results = append(results, result)
+
+                // if the hero lost a battle, stop the simulation
+                if !result.Result {
+                  break
+                }
 	}
 
 	experience_gained := 0
