@@ -21,6 +21,7 @@ type MonsterLevel struct {
 type Enemy struct {
 	MonsterLevel
 	Name string
+        Boss bool
 }
 
 func ReadMonsterData() []MonsterLevel {
@@ -91,12 +92,13 @@ func ReadMonsterData() []MonsterLevel {
 	return monster_levels
 }
 
-func BuildEnemy(name string, level int, monster_levels []MonsterLevel) Enemy {
+func BuildEnemy(name string, level int, boss bool, monster_levels []MonsterLevel) Enemy {
 	for _, monster_level := range monster_levels {
 		if monster_level.Level == level {
 			return Enemy{
 				MonsterLevel: monster_level,
 				Name:         name,
+                                Boss: boss,
 			}
 		}
 	}

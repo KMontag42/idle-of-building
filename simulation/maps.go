@@ -1,23 +1,21 @@
 package simulation
 
 import (
+	"math/rand"
 	"fmt"
 	"log"
-	"math/rand"
-	"sync"
-	"time"
 
 	"github.com/kmontag42/idle-of-building/character"
 	"github.com/kmontag42/idle-of-building/enemy"
-	"github.com/kmontag42/idle-of-building/utils"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/net/websocket"
 )
 
-type BattleResult struct {
-	Character character.Character
-	Result    bool
-	Enemies   []enemy.Enemy
+type MapInfo struct {
+  Name string
+  MinWaveCount int
+  MaxWaveCount int
+  WaveInfo enemy.WaveInfo
 }
 
 type MapResult struct {
@@ -26,94 +24,60 @@ type MapResult struct {
 	Victory          bool
 }
 
-func Battle(hero *character.Character, enemy enemy.Enemy) bool {
-	for hero.Life() > 0 && enemy.Life > 0 {
-		enemy.Life -= hero.Dps()
-		hero.SetLife(hero.Life() - enemy.Damage)
-		log.Printf("%s HP: %f\n", hero.Build.ClassName, hero.Life())
-		log.Printf("%s HP: %f\n", enemy.Name, enemy.Life)
-		time.Sleep(1 * time.Second)
-	}
-
-	if hero.Life() <= 0 {
-		log.Printf("%s has been defeated\n", hero.Build.ClassName)
-		return false
-	} else {
-		log.Printf("%s has been defeated\n", enemy.Name)
-		return true
-	}
+func (mr MapResult) String() string {
+	return fmt.Sprintf(
+		"Results: %v\nExperienceGained: %f\nVictory: %t\n",
+		mr.Results,
+		mr.ExperienceGained,
+		mr.Victory,
+	)
 }
 
-func RunMap(
-	hero *character.Character,
-	enemies []enemy.Enemy,
-	wg *sync.WaitGroup,
-	resultChannel chan<- BattleResult,
-	ws *websocket.Conn,
-) {
-	defer wg.Done()
-	heroWon := true
-	for _, enemy := range enemies {
-		log.Printf("%s has encountered %s\n", hero.Build.ClassName, enemy.Name)
-		if !Battle(hero, enemy) {
-			log.Printf("%s has lost the battle\n", hero.Build.ClassName)
-			heroWon = false
-			break
-		}
-                err := utils.EmitMessage(
-                  ws,
-                  "battle",
-                  fmt.Sprintf("%s has defeated %s", hero.Build.ClassName, enemy.Name),
-                )
-                if err != nil {
-                  log.Printf("error sending message: %v\n", err)
-                }
-	}
-	log.Printf("%s has cleared the map\n", hero.Build.ClassName)
-	resultChannel <- BattleResult{Character: *hero, Result: heroWon, Enemies: enemies}
+var map1 MapInfo = MapInfo{
+  Name: "Map 1",
+  MinWaveCount: 1,
+  MaxWaveCount: 5,
+  WaveInfo: enemy.WaveInfo{
+    MinWaveSize:  10,
+    MaxWaveSize:  30,
+    MinWaveLevel: 60,
+    MaxWaveLevel: 80,
+    Boss:         false,
+  },
 }
 
-func ExecuteMapForCharacters(
-	characters []character.Character,
+func ExecuteMapForCharacter(
+	character *character.Character,
 	ws *websocket.Conn,
 	c echo.Context,
 ) MapResult {
-	var wg sync.WaitGroup
-	resultChannel := make(chan BattleResult)
+	var map_waves []enemy.WaveInfo
 
-	monster_levels := enemy.ReadMonsterData()
-	enemies := []enemy.Enemy{}
-	// generate random enemies
-	number_of_enemies := 1 + int(rand.Float64()*19)
-	for i := 0; i < number_of_enemies; i++ {
-		enemy_name := "Enemy" + fmt.Sprint(i)
-		enemy_level := int(rand.Float64() * 100.0)
+        wave_count := rand.Intn(map1.MaxWaveCount - map1.MinWaveCount + 1) + map1.MinWaveCount
+        log.Printf("wave count: %d\n", wave_count)
+        map_waves = make([]enemy.WaveInfo, wave_count)
+        for i := 0; i < wave_count; i++ {
+          map_waves[i] = map1.WaveInfo
+        }
 
-		enemy := enemy.BuildEnemy(enemy_name, enemy_level, monster_levels)
+        // add boss wave
+        map_waves = append(map_waves, enemy.WaveInfo{
+          MinWaveSize:  1,
+          MaxWaveSize:  1,
+          MinWaveLevel: 100,
+          MaxWaveLevel: 100,
+          Boss:         true,
+        })
 
-		enemies = append(
-			enemies,
-			enemy,
-		)
-	}
-	maps := map[*character.Character][]enemy.Enemy{}
+	var results []BattleResult
 
-	for _, character := range characters {
-		maps[&character] = enemies
-	}
-
-	for hero, enemies := range maps {
-		wg.Add(1)
-		go RunMap(hero, enemies, &wg, resultChannel, ws)
-	}
-
-	go func() {
-		wg.Wait()
-		close(resultChannel)
-	}()
-
-	results := []BattleResult{}
-	for result := range resultChannel {
+	for wave := range map_waves {
+		enemies := enemy.CreateWave(map_waves[wave])
+		result, err := SimulateWave(character, enemies, ws)
+		if err != nil {
+			log.Printf("error simulating wave: %v\n", err)
+			break
+		}
 		results = append(results, result)
 	}
 

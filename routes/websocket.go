@@ -2,6 +2,7 @@ package routes
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/kmontag42/idle-of-building/character"
 	"github.com/kmontag42/idle-of-building/simulation"
@@ -34,15 +35,21 @@ func WebSockets(c echo.Context) error {
 					break
 				}
 
-				simulation.ExecuteMapForCharacters(
-					[]character.Character{char},
+				results := simulation.ExecuteMapForCharacter(
+					&char,
 					ws,
 					c,
 				)
-                                break
+
+				end_message := fmt.Sprintf(
+					"Map completed. %f experience gained.",
+					results.ExperienceGained,
+				)
+
+				utils.EmitMessage(ws, "battle-end", end_message)
+				break
 			}
 		}
 	}).ServeHTTP(c.Response(), c.Request())
 	return nil
 }
-

@@ -1,3 +1,5 @@
 {{ block "websocket-message" . }}
-  <div id="websocket-message">{{ .Message }}</div>
+<div id="output" hx-swap-oob="beforeend">
+  <p>{{ .Data }}</p>
+</div>
 {{ end }}
