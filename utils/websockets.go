@@ -10,6 +10,7 @@ import (
 type Message struct {
 	Type string `json:"type"`
 	Data string `json:"data"`
+	Map  string `json:"map"`
 }
 
 func EmitMessage(ws *websocket.Conn, messageType string, messageData string) error {
@@ -17,7 +18,7 @@ func EmitMessage(ws *websocket.Conn, messageType string, messageData string) err
 	// build the "websocket-message" template with the message data
 	var data bytes.Buffer
 
-	template := template.Must(template.ParseFiles("views/battle.html"))
+	template := template.Must(template.ParseFiles("views/battle.html.tmpl"))
 	err := template.ExecuteTemplate(&data, "websocket-message", message)
 	if err != nil {
 		return err
@@ -31,3 +32,4 @@ func EmitMessage(ws *websocket.Conn, messageType string, messageData string) err
 	}
 	return nil
 }
+

@@ -67,9 +67,10 @@ type PlayerStat struct {
 }
 
 type Character struct {
-	XMLName xml.Name `xml:"PathOfBuilding"`
-	Build   Build    `xml:"Build"`
-	Skills  Skills   `xml:"Skills"`
+	XMLName    xml.Name `xml:"PathOfBuilding"`
+	Build      Build    `xml:"Build"`
+	Skills     Skills   `xml:"Skills"`
+	Experience float64
 }
 
 // load a character from the path-of-building xml
@@ -79,6 +80,7 @@ func LoadCharacter(xml_string string) (Character, error) {
 	if err != nil {
 		return character, err
 	}
+        character.Experience = 0
 
 	return character, nil
 }

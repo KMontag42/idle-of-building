@@ -1,0 +1,42 @@
+{{ block "pobpaste-form" . }}
+<form id="pobpaste-form" hx-encoding="multipart/form-data" hx-post="/upload-export-string" hx-swap="outerHTML">
+  <textarea name="raw" cols="42" rows="8">{{ .Raw }}</textarea>
+  <button>Upload</button>
+</form>
+{{ end }}
+
+{{ block "pobpaste" . }}
+<div id="pobpaste" hx-ext="ws" ws-connect="/ws">
+  <textarea cols="42" rows="8">{{ .Decoded }}</textarea>
+  <p>{{ .Character.Build.AscendClassName }} {{ .Character.Build.Level }}</p>
+  <p>Six Links: ({{ .Character.SixLinks | len }})</p>
+  {{ range .Character.SixLinks }}
+  <p>
+    {{ range .Gems }}
+    {{ .NameSpec }}
+    {{ end }}
+  </p>
+  {{ end }}
+  <div id="experience">
+    <p>Experience: {{ .Character.Experience }}</p>
+  </div>
+  <form id="start-map-form" ws-send>
+    <input type="hidden" name="type" value="start map" />
+    <input type="hidden" name="data" value="{{ .Decoded }}" />
+    <input type="radio" name="map" value="White Map" checked />
+    <label for="map">White</label>
+    <input type="radio" name="map" value="Yellow Map" />
+    <label for="map">Yellow</label>
+    <input type="radio" name="map" value="Red Map" />
+    <label for="map">Red</label>
+    <br>
+    <button>Run Map</button>
+  </form>
+</div>
+{{ end }}
+
+{{ block "experience-oob" . }}
+<div id="experience" hx-swap-oob="true">
+  <p>Experience: {{ .Experience }}</p>
+</div>
+{{ end }}

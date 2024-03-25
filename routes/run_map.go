@@ -15,7 +15,7 @@ func RunMapForCharacter(c echo.Context) error {
 	if err != nil {
 		return c.String(http.StatusNotAcceptable, err.Error())
 	}
-	results := simulation.ExecuteMapForCharacter(&char, nil, c)
+	results := simulation.ExecuteMapForCharacter(&char, simulation.WhiteMap, nil, c)
 
 	return c.Render(http.StatusOK, "map-results", results)
 }
