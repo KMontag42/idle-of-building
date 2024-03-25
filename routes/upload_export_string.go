@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 
 	"github.com/kmontag42/idle-of-building/character"
+	"github.com/kmontag42/idle-of-building/types"
 	"github.com/labstack/echo/v4"
 
 	"io"
@@ -15,10 +16,10 @@ import (
 type PobPaste struct {
 	Raw       string
 	Decoded   string
-	Character character.Character
+	Character types.Character
 }
 
-func newPobPaste(raw string, decoded string, character character.Character) *PobPaste {
+func newPobPaste(raw string, decoded string, character types.Character) *PobPaste {
 	return &PobPaste{
 		Raw:       raw,
 		Decoded:   decoded,

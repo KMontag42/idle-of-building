@@ -1,25 +1,24 @@
 package simulation
 
 import (
-  "fmt"
-  "log"
-  "time"
+	"fmt"
+	"log"
+	"time"
 
-  "github.com/kmontag42/idle-of-building/character"
-  "github.com/kmontag42/idle-of-building/enemy"
-  "github.com/kmontag42/idle-of-building/utils"
-  "golang.org/x/net/websocket"
+	"github.com/kmontag42/idle-of-building/types"
+	"github.com/kmontag42/idle-of-building/utils"
+	"golang.org/x/net/websocket"
 )
 
 func SimulateWave(
-	hero *character.Character,
-	enemies []enemy.Enemy,
+	hero *types.Character,
+	enemies []types.Enemy,
 	ws *websocket.Conn,
-) (BattleResult, error) {
+) (types.BattleResult, error) {
 	heroWon := true
 	for _, enemy := range enemies {
 		if !Battle(hero, enemy) {
-			log.Printf("%s has lost the battle\n", hero.Build.ClassName)
+			log.Printf("%s has lost the battle\n", hero.Name)
 			heroWon = false
 			break
 		}
@@ -32,12 +31,12 @@ func SimulateWave(
 		err := utils.EmitMessage(
 			ws,
 			"battle",
-			fmt.Sprintf("%s has cleared the wave", hero.Build.ClassName),
+			fmt.Sprintf("%s has cleared the wave", hero.Name),
 		)
 		if err != nil {
 			log.Printf("error sending message: %v\n", err)
 		}
 	}
 
-	return BattleResult{Character: *hero, Result: heroWon, Enemies: enemies}, nil
+	return types.BattleResult{Character: *hero, Result: heroWon, Enemies: enemies}, nil
 }

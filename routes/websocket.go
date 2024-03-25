@@ -5,15 +5,16 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
+	"strconv"
 
-	"github.com/kmontag42/idle-of-building/character"
 	"github.com/kmontag42/idle-of-building/simulation"
+	"github.com/kmontag42/idle-of-building/types"
 	"github.com/kmontag42/idle-of-building/utils"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/net/websocket"
 )
 
-func EmitExperience(ws *websocket.Conn, character *character.Character) error {
+func EmitExperience(ws *websocket.Conn, character *types.Character) error {
 	// build the "websocket-message" template with the message data
 	var data bytes.Buffer
 
@@ -43,14 +44,18 @@ func WebSockets(c echo.Context) error {
 				c.Logger().Error(err)
 				break
 			}
-			var message utils.Message
+			var message types.Message
 			if err := json.Unmarshal([]byte(msg), &message); err != nil {
 				c.Logger().Error(err)
 				break
 			}
 			if message.Type == "start map" {
-				character_xml := message.Data
 				map_type := message.Map
+                                character_id, err := strconv.Atoi(message.Id)
+                                if err != nil {
+                                  c.Logger().Error(err)
+                                  break
+                                }
 				map_info, err := simulation.GetMapInfo(map_type)
 				utils.EmitMessage(
 					ws,
@@ -61,7 +66,7 @@ func WebSockets(c echo.Context) error {
 					c.Logger().Error(err)
 					break
 				}
-				char, err := character.LoadCharacter(character_xml)
+                                char := types.CharactersMap[character_id]
 				if err != nil {
 					c.Logger().Error(err)
 					break
@@ -77,20 +82,19 @@ func WebSockets(c echo.Context) error {
 				battle_result := "completed"
 				if !results.Victory {
 					battle_result = "failed"
+				} else {
+					err = EmitExperience(ws, &char)
+					if err != nil {
+						c.Logger().Error(err)
+						break
+					}
 				}
+
 				end_message := fmt.Sprintf(
 					"Map %s. %f experience gained.",
 					battle_result,
 					results.ExperienceGained,
 				)
-
-                                // increase player experience
-                                char.Experience += results.ExperienceGained
-                                err = EmitExperience(ws, &char)
-                                if err != nil {
-                                  c.Logger().Error(err)
-                                  break
-                                }
 
 				utils.EmitMessage(ws, "battle-end", end_message)
 			}

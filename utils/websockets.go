@@ -4,17 +4,12 @@ import (
 	"bytes"
 	"html/template"
 
+	"github.com/kmontag42/idle-of-building/types"
 	"golang.org/x/net/websocket"
 )
 
-type Message struct {
-	Type string `json:"type"`
-	Data string `json:"data"`
-	Map  string `json:"map"`
-}
-
 func EmitMessage(ws *websocket.Conn, messageType string, messageData string) error {
-	message := Message{Type: messageType, Data: messageData}
+	message := types.Message{Type: messageType, Data: messageData}
 	// build the "websocket-message" template with the message data
 	var data bytes.Buffer
 
@@ -32,4 +27,3 @@ func EmitMessage(ws *websocket.Conn, messageType string, messageData string) err
 	}
 	return nil
 }
-

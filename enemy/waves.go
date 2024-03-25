@@ -3,17 +3,11 @@ package enemy
 import (
 	"fmt"
 	"math/rand"
+
+	"github.com/kmontag42/idle-of-building/types"
 )
 
-type WaveInfo struct {
-	MinWaveSize  int
-	MaxWaveSize  int
-	MinWaveLevel int
-	MaxWaveLevel int
-	Boss         bool
-}
-
-func CreateWave(wave_info WaveInfo) (enemies []Enemy) {
+func CreateWave(wave_info types.WaveInfo) (enemies []types.Enemy) {
 	monster_levels := ReadMonsterData()
 	number_of_enemies := max(int(rand.Float64()*float64(wave_info.MaxWaveSize)), wave_info.MinWaveSize)
 

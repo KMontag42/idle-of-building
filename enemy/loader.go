@@ -5,26 +5,11 @@ import (
 	"log"
 	"os"
 	"strconv"
+
+	"github.com/kmontag42/idle-of-building/types"
 )
 
-type MonsterLevel struct {
-	Level      int
-	Damage     float64
-	Evasion    int
-	Accuracy   int
-	Life       float64
-	Experience int
-	MinionLife int
-	Armor      int
-}
-
-type Enemy struct {
-	MonsterLevel
-	Name string
-        Boss bool
-}
-
-func ReadMonsterData() []MonsterLevel {
+func ReadMonsterData() []types.MonsterLevel {
 	// read monster data from data/monsters-simple.csv
 	file, err := os.Open("data/monsters-simple.csv")
 	if err != nil {
@@ -42,7 +27,7 @@ func ReadMonsterData() []MonsterLevel {
 		log.Fatal(err)
 	}
 
-	monster_levels := []MonsterLevel{}
+	monster_levels := []types.MonsterLevel{}
 	for _, record := range records {
 		level, err := strconv.Atoi(record[0])
 		if err != nil {
@@ -77,7 +62,7 @@ func ReadMonsterData() []MonsterLevel {
 			log.Fatal(err)
 		}
 
-		monster_levels = append(monster_levels, MonsterLevel{
+		monster_levels = append(monster_levels, types.MonsterLevel{
 			Level:      level,
 			Damage:     damage,
 			Evasion:    evasion,
@@ -92,10 +77,10 @@ func ReadMonsterData() []MonsterLevel {
 	return monster_levels
 }
 
-func BuildEnemy(name string, level int, boss bool, monster_levels []MonsterLevel) Enemy {
+func BuildEnemy(name string, level int, boss bool, monster_levels []types.MonsterLevel) types.Enemy {
 	for _, monster_level := range monster_levels {
 		if monster_level.Level == level {
-			return Enemy{
+			return types.Enemy{
 				MonsterLevel: monster_level,
 				Name:         name,
                                 Boss: boss,
