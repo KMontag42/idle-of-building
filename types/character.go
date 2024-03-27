@@ -1,7 +1,8 @@
 package types
 
 import (
-  "encoding/xml"
+	"encoding/xml"
+	"strconv"
 )
 
 // a character loaded from the path-of-building xml
@@ -72,8 +73,9 @@ type Character struct {
 	Skills     Skills   `xml:"Skills"`
 	Experience float64
 	Name       string
-        MapResults []MapResult
-        Id         int
+	MapResults []MapResult
+	Id         int
+        Life       float64
 }
 
 func (c Character) Dps() float64 {
@@ -85,21 +87,13 @@ func (c Character) Dps() float64 {
 	panic("DPS not found")
 }
 
-func (c Character) Life() float64 {
+func (c Character) MaxLife() float64 {
 	for _, stat := range c.Build.PlayerStats {
 		if stat.Stat == "TotalEHP" {
 			return stat.Value
 		}
 	}
 	panic("Life not found")
-}
-
-func (c Character) SetLife(value float64) {
-	for i, stat := range c.Build.PlayerStats {
-		if stat.Stat == "TotalEHP" {
-			c.Build.PlayerStats[i].Value = value
-		}
-	}
 }
 
 func (c Character) SixLinks() []Skill {
@@ -112,4 +106,16 @@ func (c Character) SixLinks() []Skill {
 		}
 	}
 	return six_links
+}
+
+func (c Character) MainActiveSkill() Gem {
+	six_links := c.SixLinks()
+	for _, skill := range six_links {
+		main_skill_index, err := strconv.Atoi(skill.MainActiveSkill)
+		if err != nil {
+			continue
+		}
+		return skill.Gems[main_skill_index-1]
+	}
+	return Gem{}
 }

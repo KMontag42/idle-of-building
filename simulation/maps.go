@@ -110,6 +110,7 @@ func ExecuteMapForCharacter(
         map_result := types.MapResult{Results: results, ExperienceGained: float64(experience_gained), Victory: victory}
         char.Experience += float64(experience_gained)
         char.MapResults = append(char.MapResults, map_result)
+        char.Life = char.MaxLife()
         types.CharactersMap[char.Id] = *char
 
 	return map_result

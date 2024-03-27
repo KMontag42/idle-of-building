@@ -7,7 +7,11 @@
 
 {{ block "pobpaste" . }}
 <div id="pobpaste" hx-ext="ws" ws-connect="/ws">
+  <textarea>{{ .Decoded }}</textarea>
   <p>{{ .Character.Name }} {{ .Character.Build.Level }}</p>
+  <div id="life">
+    <p>Life: {{ .Character.Life }}</p>
+  </div>
   <div id="experience">
     <p>Experience: {{ .Character.Experience }}</p>
   </div>
@@ -23,6 +27,12 @@
     <br>
     <button>Run Map</button>
   </form>
+</div>
+{{ end }}
+
+{{ block "life-oob" . }}
+<div id="life" hx-swap-oob="true">
+  <p>Life: {{ .Life }}</p>
 </div>
 {{ end }}
 

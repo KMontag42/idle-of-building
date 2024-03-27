@@ -17,7 +17,7 @@ func SimulateWave(
 ) (types.BattleResult, error) {
 	heroWon := true
 	for _, enemy := range enemies {
-		if !Battle(hero, enemy) {
+		if !Battle(hero, enemy, ws) {
 			log.Printf("%s has lost the battle\n", hero.Name)
 			heroWon = false
 			break
